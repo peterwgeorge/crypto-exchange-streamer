@@ -1,6 +1,7 @@
 namespace CryptoExchangeModels.Common;
 
 using CryptoExchangeModels.Binance;
+using CryptoExchangeModels.Btcc;
 using CryptoExchangeModels.Coinbase;
 using CryptoExchangeModels.Kraken;
 
@@ -15,6 +16,8 @@ public static class FeedFactory
                 return KrakenMarketDataFeeds.Endpoint;
             case "binance":
                 return BinanceMarketDataFeeds.BaseEndpoint;
+            case "btcc":
+                return BtccMarketDataFeeds.MarketDataEndpoint;
             default:
                 throw new ArgumentException($"{exchange} not supported.");
         }
