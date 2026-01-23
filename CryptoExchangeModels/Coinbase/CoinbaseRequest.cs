@@ -31,10 +31,10 @@ public class CoinbaseRequest : IExchangeRequest
 
     static string GenerateToken()
     {
-        ISignatureAlgorithm algo = SignatureAlgorithmFactory.Create();
+        ISignatureAlgorithm algo = SignatureAlgorithmFactory.Create("coinbase");
         var payload = new Dictionary<string, object>
         {
-            { "sub", SecretsProvider.GetApiKeyName()},
+            { "sub", SecretsProvider.GetApiKeyName("coinbase")},
             { "iss", "coinbase-cloud" },
             { "nbf", Convert.ToInt64((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds) },
             { "exp", Convert.ToInt64((DateTime.UtcNow.AddMinutes(1) - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds) },

@@ -30,9 +30,7 @@ public class Program
                         new ExchangeWebSocketService(
                             provider.GetRequiredService<ILogger<ExchangeWebSocketService>>(),
                             configuration,
-                            config.Name,
-                            config.Channel,
-                            config.Symbols.ToArray()
+                            config
                         ));
                 }
             });
