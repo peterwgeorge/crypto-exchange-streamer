@@ -11,7 +11,7 @@ public static class CredentialProviderFactory
             case CredentialProviders.AwsSecretsManager:
                 return new AwsSecretsManagerProvider();
             case CredentialProviders.Local:
-                throw new NotImplementedException();
+                return  new LocalCredentialProvider();
             default:
                 throw new NotImplementedException();
         }
