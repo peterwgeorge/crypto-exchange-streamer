@@ -1,4 +1,4 @@
-namespace CryptoExchangeModels.Common;
+namespace CryptoExchangeModels.Common.Types;
 
 public static class MethodTypes{
     public const string Subscribe = "subscribe";

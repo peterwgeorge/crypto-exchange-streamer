@@ -2,10 +2,10 @@ namespace CryptoExchangeModels.Coinbase;
 
 using System.Security.Cryptography;
 using Newtonsoft.Json;
-using AmazonSecretsManagerHandler;
 using SignatureHandling;
 using SignatureHandling.Interfaces;
-using CryptoExchangeModels.Common;
+using CryptoExchangeModels.Common.Types;
+using Credentials.Types;
 
 public class CoinbaseRequest : IExchangeRequest
 {
@@ -20,21 +20,21 @@ public class CoinbaseRequest : IExchangeRequest
     
     [JsonProperty(PropertyName = "jwt")]
     public string Jwt { get; private set; }
-    
-    public CoinbaseRequest(string type, string channel, string[] product_ids)
+
+    public CoinbaseRequest(string type, ExchangeConfig c, ICredentialProvider p)
     {
         Type = type;
-        Channel = channel;
-        ProductIds = product_ids;
-        Jwt = GenerateToken();
+        Channel = c.Channel;
+        ProductIds = c.Symbols.ToArray();
+        Jwt = GenerateToken(p);
     }
 
-    static string GenerateToken()
+    static string GenerateToken(ICredentialProvider p)
     {
-        ISignatureAlgorithm algo = SignatureAlgorithmFactory.Create();
+        ISignatureAlgorithm algo = SignatureAlgorithmFactory.Create(p);
         var payload = new Dictionary<string, object>
         {
-            { "sub", SecretsProvider.GetApiKeyName()},
+            { "sub", p.GetApiKeyName()},
             { "iss", "coinbase-cloud" },
             { "nbf", Convert.ToInt64((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds) },
             { "exp", Convert.ToInt64((DateTime.UtcNow.AddMinutes(1) - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds) },

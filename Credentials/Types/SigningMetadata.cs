@@ -1,4 +1,4 @@
-namespace AmazonSecretsManagerHandler.Models;
+namespace Credentials.Types;
 
 using Newtonsoft.Json;
 

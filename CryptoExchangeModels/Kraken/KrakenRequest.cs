@@ -1,8 +1,7 @@
 namespace CryptoExchangeModels.Kraken;
 
-using CryptoExchangeModels.Common;
+using CryptoExchangeModels.Common.Types;
 using Newtonsoft.Json;
-
 
 public class KrakenRequest : IExchangeRequest
 {

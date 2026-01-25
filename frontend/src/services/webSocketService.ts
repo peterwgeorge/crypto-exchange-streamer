@@ -31,7 +31,7 @@ export class WebSocketService {
     this.socket.onmessage = (event) => {
       try {
 
-        if (event.data === "Connected to Coinbase WebSocket relay")
+        if (event.data === "Connected to CryptoExchange WebSocket relay")
           return;
 
         const data = JSON.parse(event.data) as PricePoint;

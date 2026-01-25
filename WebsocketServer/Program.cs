@@ -1,4 +1,5 @@
-﻿
+﻿using CryptoExchangeModels.Common.Types;
+
 public class Program
 {
     public static async Task Main(string[] args)
@@ -29,10 +30,7 @@ public class Program
                     services.AddSingleton<IHostedService>(provider =>
                         new ExchangeWebSocketService(
                             provider.GetRequiredService<ILogger<ExchangeWebSocketService>>(),
-                            configuration,
-                            config.Name,
-                            config.Channel,
-                            config.Symbols.ToArray()
+                            config
                         ));
                 }
             });

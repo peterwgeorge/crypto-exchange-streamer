@@ -1,4 +1,4 @@
-namespace AmazonSecretsManagerHandler;
+namespace Credentials.Implementations;
 
 using Amazon;
 using Amazon.SecretsManager;
@@ -7,21 +7,21 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using AmazonSecretsManagerHandler.Models;
+using Credentials.Types;
 
-public static class SecretsProvider
+public class AwsSecretsManagerProvider : ICredentialProvider
 {
-    private static SigningMetadata? _credentials;
-    private static readonly object _lock = new object();
-    private static bool _initialized = false;
+    private SigningMetadata? _credentials;
+    private readonly object _lock = new object();
+    private bool _initialized = false;
 
-    private static string? _secretName;
-    private static string? _region;
+    private string? _secretName;
+    private string? _region;
     
-    public static void Configure(IConfiguration configuration)
+    public void Configure(AuthenticationConfig configuration)
     {
-        _secretName = configuration["SecretsManager:SecretName"];
-        _region = configuration["SecretsManager:Region"];
+        _secretName = configuration.SecretName;
+        _region = configuration.Region;
         
         if (string.IsNullOrEmpty(_secretName) || string.IsNullOrEmpty(_region))
         {
@@ -29,7 +29,7 @@ public static class SecretsProvider
         }
     }
 
-    public static async Task Initialize()
+    public async Task Initialize()
     {
         if (!_initialized)
         {
@@ -42,14 +42,12 @@ public static class SecretsProvider
         }
     }
 
-    private static async Task<SigningMetadata> FetchCredentials()
+    private async Task<SigningMetadata> FetchCredentials()
     {
-        string secretName = "Coinbase-Test-Key-1";
-        string region = "us-east-1";
-        IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(region));
+        IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(_region));
         GetSecretValueRequest request = new GetSecretValueRequest
         {
-            SecretId = secretName,
+            SecretId = _secretName,
             VersionStage = "AWSCURRENT"
         };
         
@@ -59,6 +57,7 @@ public static class SecretsProvider
             string secretJson = response.SecretString;
             
             var result = JsonConvert.DeserializeObject<SigningMetadata>(secretJson);
+            result.Secret = result.Secret.Replace("\\n", "\n");
             if (result == null)
             {
                 throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
@@ -74,7 +73,7 @@ public static class SecretsProvider
     }
 
     
-    public static string GetAlgorithmString()
+    public string GetAlgorithmString()
     {
         if (!_initialized)
         {
@@ -88,7 +87,7 @@ public static class SecretsProvider
         return _credentials.Algorithm;
     }
 
-    public static string GetApiKeyName()
+    public string GetApiKeyName()
     {
         if (!_initialized)
         {
@@ -102,7 +101,7 @@ public static class SecretsProvider
         return _credentials.KeyId;
     }
 
-    public static string GetSecretKey()
+    public string GetSecretKey()
     {
         if (!_initialized)
         {

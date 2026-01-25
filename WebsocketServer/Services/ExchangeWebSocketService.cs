@@ -1,45 +1,30 @@
-using AmazonSecretsManagerHandler;
-using CryptoExchangeModels.Coinbase;
 using WebsocketServer.ConnectionHandlers;
+using CryptoExchangeModels.Common.Types;
 using System.Net.WebSockets;
 
 public class ExchangeWebSocketService : BackgroundService
 {
     private readonly ILogger<ExchangeWebSocketService> _logger;
-    private readonly IConfiguration _configuration;
-    private readonly string _exchange;
-    private readonly string _channel;
-    private readonly string[] _symbols;
+    private readonly ExchangeConfig _config;
 
     public ExchangeWebSocketService(
         ILogger<ExchangeWebSocketService> logger,
-        IConfiguration configuration,
-        string exchange,
-        string channel,
-        string[] symbols)
+        ExchangeConfig config)
     {
         _logger = logger;
-        _configuration = configuration;
-        _exchange = exchange;
-        _channel = channel;
-        _symbols = symbols;
+        _config = config;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation($"Starting {_exchange} WebSocket service");
+        _logger.LogInformation($"Starting {_config.Name} WebSocket service");
         using var socket = new ClientWebSocket();
-        var handler = new ConnectionHandler(socket, _exchange);
+        var handler = new ConnectionHandler(socket, _config);
 
         try
         {
-            if(_exchange == "coinbase"){
-                SecretsProvider.Configure(_configuration);
-                await SecretsProvider.Initialize();
-            }
-            
             await handler.Connect();
-            await handler.Subscribe(_channel, _symbols);
+            await handler.Subscribe();
 
             byte[] buffer = new byte[4096];
 
@@ -50,7 +35,7 @@ public class ExchangeWebSocketService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"An unexpected error occurred in the {_exchange} WebSocket service");
+            _logger.LogError(ex, $"An unexpected error occurred in the {_config.Name} WebSocket service");
         }
         finally
         {
@@ -62,7 +47,7 @@ public class ExchangeWebSocketService : BackgroundService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, $"Error closing {_exchange} WebSocket connection");
+                    _logger.LogWarning(ex, $"Error closing {_config.Name} WebSocket connection");
                 }
             }
         }
