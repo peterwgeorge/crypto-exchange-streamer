@@ -1,6 +1,7 @@
 import CoinbaseLogo from '../assets/icons/coinbase.svg';
 import BinanceLogo from '../assets/icons/binance.png';
 import KrakenLogo from '../assets/icons/kraken.png';
+import BtccLogo from '../assets/icons/btcc_logo.svg';
 
 export default function PriceChartLegend() {
   return (
@@ -51,6 +52,22 @@ export default function PriceChartLegend() {
           src={KrakenLogo}
           alt="Kraken"
           style={{ height: '1.2rem', display: 'inline-block' }}
+        />
+      </div>
+      <div
+        className="text-body"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          lineHeight: 1,
+        }}
+      >
+        <span style={{ color: '#08000', fontSize: '0.75rem' }}>⬤</span>
+        <img
+          src={BtccLogo}
+          alt="BTCC"
+          style={{ height: '1rem', display: 'inline-block' }}
         />
       </div>
     </div>
