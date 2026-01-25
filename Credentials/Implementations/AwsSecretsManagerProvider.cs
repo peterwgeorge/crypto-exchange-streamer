@@ -11,12 +11,12 @@ using Credentials.Types;
 
 public class AwsSecretsManagerProvider : ICredentialProvider
 {
-    private static SigningMetadata? _credentials;
-    private static readonly object _lock = new object();
-    private static bool _initialized = false;
+    private SigningMetadata? _credentials;
+    private readonly object _lock = new object();
+    private bool _initialized = false;
 
-    private static string? _secretName;
-    private static string? _region;
+    private string? _secretName;
+    private string? _region;
     
     public void Configure(AuthenticationConfig configuration)
     {
@@ -44,12 +44,10 @@ public class AwsSecretsManagerProvider : ICredentialProvider
 
     private async Task<SigningMetadata> FetchCredentials()
     {
-        string secretName = "Coinbase-Test-Key-1";
-        string region = "us-east-1";
-        IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(region));
+        IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(_region));
         GetSecretValueRequest request = new GetSecretValueRequest
         {
-            SecretId = secretName,
+            SecretId = _secretName,
             VersionStage = "AWSCURRENT"
         };
         
@@ -59,6 +57,7 @@ public class AwsSecretsManagerProvider : ICredentialProvider
             string secretJson = response.SecretString;
             
             var result = JsonConvert.DeserializeObject<SigningMetadata>(secretJson);
+            result.Secret = result.Secret.Replace("\\n", "\n");
             if (result == null)
             {
                 throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
