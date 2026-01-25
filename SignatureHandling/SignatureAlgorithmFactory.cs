@@ -1,17 +1,17 @@
 namespace SignatureHandling;
 
 using SignatureHandling.Interfaces;
-using AmazonSecretsManagerHandler;
+using Credentials.Types;
 
 public static class SignatureAlgorithmFactory
 {
-    public static ISignatureAlgorithm Create(string exchange)
+    public static ISignatureAlgorithm Create(ICredentialProvider p)
     {
-        return SecretsProvider.GetAlgorithmString(exchange) switch
+        return p.GetAlgorithmString() switch
         {
-            "ecdsa" => new EcdsaSignatureAlgorithm(SecretsProvider.GetSecretKey(exchange), SecretsProvider.GetApiKeyName(exchange)),
-            "ed25519" => new Ed25519SignatureAlgorithm(SecretsProvider.GetSecretKey(exchange), SecretsProvider.GetApiKeyName(exchange)),
-            _ => throw new NotSupportedException($"Unsupported algorithm: {SecretsProvider.GetAlgorithmString(exchange)}")
+            "ecdsa" => new EcdsaSignatureAlgorithm(p.GetSecretKey(), p.GetApiKeyName()),
+            "ed25519" => new Ed25519SignatureAlgorithm(p.GetSecretKey(), p.GetApiKeyName()),
+            _ => throw new NotSupportedException($"Unsupported algorithm: {p.GetAlgorithmString()}")
         };
     }
 }

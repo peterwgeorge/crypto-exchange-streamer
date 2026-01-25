@@ -1,6 +1,6 @@
 namespace CryptoExchangeModels.Binance;
 
-using CryptoExchangeModels.Common;
+using CryptoExchangeModels.Common.Types;
 using Newtonsoft.Json;
 
 public class BinanceRequest : IExchangeRequest
@@ -14,7 +14,8 @@ public class BinanceRequest : IExchangeRequest
     [JsonProperty(PropertyName = "params")]
     public string[] Params;
 
-    public BinanceRequest(string method, string[] symbols){
+    public BinanceRequest(string method, string[] symbols)
+    {
         Id = Guid.NewGuid().ToString();
         Method = method;
         Params = symbols;

@@ -1,6 +1,6 @@
 namespace CryptoExchangeModels.Btcc;
 
-using CryptoExchangeModels.Common;
+using CryptoExchangeModels.Common.Types;
 using Newtonsoft.Json;
 
 public class BtccRequest : IExchangeRequest

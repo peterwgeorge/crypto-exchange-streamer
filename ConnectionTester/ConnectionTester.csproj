@@ -13,7 +13,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <ProjectReference Include="../AmazonSecretsManagerHandler/AmazonSecretsManagerHandler.csproj" />
     <ProjectReference Include="../CryptoExchangeModels/CryptoExchangeModels.csproj" />
     <ProjectReference Include="../WebsocketServer/WebsocketServer.csproj"/>
   </ItemGroup>

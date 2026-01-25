@@ -9,10 +9,10 @@
   <ItemGroup>
     <PackageReference Include="Jose-JWT" Version="5.1.1" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.8.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NSec.Cryptography" Version="24.4.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
-    <ProjectReference Include="../AmazonSecretsManagerHandler/AmazonSecretsManagerHandler.csproj" />
+    <ProjectReference Include="../Credentials/Credentials.csproj" />
   </ItemGroup>
 
 </Project>

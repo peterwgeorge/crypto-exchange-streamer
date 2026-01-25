@@ -4,22 +4,26 @@ using CryptoExchangeModels.Binance;
 using CryptoExchangeModels.Btcc;
 using CryptoExchangeModels.Coinbase;
 using CryptoExchangeModels.Kraken;
+using CryptoExchangeModels.Common.Types;
+using Credentials.Types;
 
 public static class RequestFactory
 {
-    public static IExchangeRequest CreateSubscribeRequest(string exchange, string channel, string[] symbols)
+    public static IExchangeRequest CreateSubscribeRequest(ExchangeConfig c, ICredentialProvider p)
     {
-        switch(exchange.ToLower()){
+        IExchangeRequest r;
+        switch (c.Name.ToLower())
+        {
             case "coinbase":
-                return new CoinbaseRequest(MethodTypes.Subscribe, channel, symbols);
+                return new CoinbaseRequest(MethodTypes.Subscribe, c, p);
             case "kraken":
-                return new KrakenRequest(MethodTypes.Subscribe, channel,  symbols);
+                return new KrakenRequest(MethodTypes.Subscribe, c.Channel, c.Symbols.ToArray());
             case "binance":
-                return new BinanceRequest(MethodTypes.Subscribe.ToUpper(), symbols);
+                return new BinanceRequest(MethodTypes.Subscribe.ToUpper(), c.Symbols.ToArray());
             case "btcc":
-                return new BtccRequest("ReqSubcriV2", symbols);
+                return new BtccRequest("ReqSubcriV2", c.Symbols.ToArray());
             default:
-                throw new ArgumentException($"{exchange} not supported.");
+                throw new ArgumentException($"{c.Name} not supported.");
         }
     }
 }
