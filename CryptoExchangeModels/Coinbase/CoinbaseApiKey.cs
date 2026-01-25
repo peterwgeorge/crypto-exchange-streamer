@@ -18,6 +18,6 @@ public class CoinbaseApiKey : IKey
 
     public string GetKey()
     {
-        return PrivateKey;
+        return PrivateKey.Replace("\\n", "\n");
     }
 }

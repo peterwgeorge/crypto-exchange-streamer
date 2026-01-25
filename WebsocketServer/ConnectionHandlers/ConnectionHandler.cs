@@ -39,7 +39,7 @@ public class ConnectionHandler{
 
     public async Task Subscribe()
     {
-        IExchangeRequest request = RequestFactory.CreateSubscribeRequest(_config, _credentialProvider.GetCredentials());
+        IExchangeRequest request = RequestFactory.CreateSubscribeRequest(_config, _credentialProvider);
         string json = JsonConvert.SerializeObject(request);
         Console.WriteLine($"Sending {_config.Name} request message:");
         Console.WriteLine(json);

@@ -9,13 +9,13 @@ using Credentials.Types;
 
 public static class RequestFactory
 {
-    public static IExchangeRequest CreateSubscribeRequest(ExchangeConfig c, IKey k)
+    public static IExchangeRequest CreateSubscribeRequest(ExchangeConfig c, ICredentialProvider p)
     {
         IExchangeRequest r;
         switch (c.Name.ToLower())
         {
             case "coinbase":
-                return new CoinbaseRequest(MethodTypes.Subscribe, c, k);
+                return new CoinbaseRequest(MethodTypes.Subscribe, c, p.GetCredentials());
             case "kraken":
                 return new KrakenRequest(MethodTypes.Subscribe, c.Channel, c.Symbols.ToArray());
             case "binance":

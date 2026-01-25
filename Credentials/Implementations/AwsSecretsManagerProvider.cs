@@ -53,7 +53,6 @@ public class AwsSecretsManagerProvider : ICredentialProvider
         {
             var response = await client.GetSecretValueAsync(request);
             string secretJson = response.SecretString;
-            
             var result = JsonConvert.DeserializeObject(secretJson, _type);
             if (result == null)
             {
