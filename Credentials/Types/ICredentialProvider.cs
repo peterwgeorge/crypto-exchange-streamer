@@ -2,14 +2,12 @@ namespace Credentials.Types;
 
 public interface ICredentialProvider
 {
-    void Configure(AuthenticationConfig configuration);
+    void Configure(AuthenticationConfig configuration, Type type);
 
     Task Initialize();
 
-    string GetAlgorithmString();
+    Task<IKey> FetchCredentials();
 
-    string GetApiKeyName();
-
-    string GetSecretKey();
+    IKey GetCredentials();
 
 }

@@ -9,14 +9,16 @@ using Credentials.Types;
 
 public class LocalCredentialProvider : ICredentialProvider
 {
-    private SigningMetadata? _credentials;
+    private IKey _credentials;
+    private Type _type;
     private AuthenticationConfig _config;
     private readonly object _lock = new object();
     private bool _initialized = false;
     
-    public void Configure(AuthenticationConfig config)
+    public void Configure(AuthenticationConfig config, Type type)
     {
         _config = config;
+        _type = type;
     }
 
     public async Task Initialize()
@@ -32,67 +34,38 @@ public class LocalCredentialProvider : ICredentialProvider
         }
     }
 
-    private async Task<SigningMetadata> FetchCredentials()
+    public async Task<IKey> FetchCredentials()
     {
         try
         {
-            var result = JsonConvert.DeserializeObject<SigningMetadata>(secretJson);
-            result.Secret = result.Secret.Replace("\\n", "\n");
+            string contents = await File.ReadAllTextAsync(_config.Location);
+            var result = JsonConvert.DeserializeObject(contents, _type);
+
             if (result == null)
             {
-                throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
+                throw new InvalidOperationException($"Failed to deserialize credentials at {_config.Location}");
             }
 
-            return result;
+            return result as IKey;
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Error retrieving Coinbase credentials: {e.Message}");
+            Console.Error.WriteLine($"Error retrieving credentials: {e.Message}");
             throw;
         }
     }
 
-    
-    public string GetAlgorithmString()
+    public IKey GetCredentials()
     {
         if (!_initialized)
         {
-            throw new InvalidOperationException("SecretsProvider has not been initialized. Call Initialize() first.");
+            throw new InvalidOperationException($"{_config.Provider.ToString()} provider has not been initialized. Call Initialize() first.");
         }
 
         if(_credentials == null){
-            throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
+            throw new InvalidOperationException($"Failed to deserialize {_config.Provider.ToString()} credentials");
         }
 
-        return _credentials.Algorithm;
+        return _credentials;
     }
-
-    public string GetApiKeyName()
-    {
-        if (!_initialized)
-        {
-            throw new InvalidOperationException("SecretsProvider has not been initialized. Call Initialize() first.");
-        }
-
-        if(_credentials == null){
-            throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
-        }
-
-        return _credentials.KeyId;
-    }
-
-    public string GetSecretKey()
-    {
-        if (!_initialized)
-        {
-            throw new InvalidOperationException("SecretsProvider has not been initialized. Call Initialize() first.");
-        }
-
-        if(_credentials == null){
-            throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
-        }
-
-        return _credentials.Secret;
-    }
-
 }

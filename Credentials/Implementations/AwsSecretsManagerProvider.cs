@@ -11,19 +11,17 @@ using Credentials.Types;
 
 public class AwsSecretsManagerProvider : ICredentialProvider
 {
-    private SigningMetadata? _credentials;
+    private AuthenticationConfig _config;
+    private IKey _credentials;
+    private Type _type;
     private readonly object _lock = new object();
     private bool _initialized = false;
-
-    private string? _secretName;
-    private string? _region;
     
-    public void Configure(AuthenticationConfig configuration)
+    public void Configure(AuthenticationConfig configuration, Type type)
     {
-        _secretName = configuration.SecretName;
-        _region = configuration.Region;
-        
-        if (string.IsNullOrEmpty(_secretName) || string.IsNullOrEmpty(_region))
+        _config = configuration;
+        _type = type;
+        if (string.IsNullOrEmpty(_config.SecretName) || string.IsNullOrEmpty(_config.Region))
         {
             throw new InvalidOperationException("SecretsManager configuration missing. Check appsettings.json.");
         }
@@ -42,12 +40,12 @@ public class AwsSecretsManagerProvider : ICredentialProvider
         }
     }
 
-    private async Task<SigningMetadata> FetchCredentials()
+    public async Task<IKey> FetchCredentials()
     {
-        IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(_region));
+        IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(_config.Region));
         GetSecretValueRequest request = new GetSecretValueRequest
         {
-            SecretId = _secretName,
+            SecretId = _config.SecretName,
             VersionStage = "AWSCURRENT"
         };
         
@@ -56,63 +54,32 @@ public class AwsSecretsManagerProvider : ICredentialProvider
             var response = await client.GetSecretValueAsync(request);
             string secretJson = response.SecretString;
             
-            var result = JsonConvert.DeserializeObject<SigningMetadata>(secretJson);
-            result.Secret = result.Secret.Replace("\\n", "\n");
+            var result = JsonConvert.DeserializeObject(secretJson, _type);
             if (result == null)
             {
-                throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
+                throw new InvalidOperationException("Failed to deserialize secret");
             }
 
-            return result;
+            return result as IKey;
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Error retrieving Coinbase credentials: {e.Message}");
+            Console.Error.WriteLine($"Error retrieving credentials: {e.Message}");
             throw;
         }
     }
 
-    
-    public string GetAlgorithmString()
+    public IKey GetCredentials()
     {
         if (!_initialized)
         {
-            throw new InvalidOperationException("SecretsProvider has not been initialized. Call Initialize() first.");
+            throw new InvalidOperationException($"{_config.Provider.ToString()} provider has not been initialized. Call Initialize() first.");
         }
 
         if(_credentials == null){
-            throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
+            throw new InvalidOperationException($"Failed to deserialize {_config.Provider.ToString()} credentials");
         }
 
-        return _credentials.Algorithm;
+        return _credentials;
     }
-
-    public string GetApiKeyName()
-    {
-        if (!_initialized)
-        {
-            throw new InvalidOperationException("SecretsProvider has not been initialized. Call Initialize() first.");
-        }
-
-        if(_credentials == null){
-            throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
-        }
-
-        return _credentials.KeyId;
-    }
-
-    public string GetSecretKey()
-    {
-        if (!_initialized)
-        {
-            throw new InvalidOperationException("SecretsProvider has not been initialized. Call Initialize() first.");
-        }
-
-        if(_credentials == null){
-            throw new InvalidOperationException("Failed to deserialize Coinbase credentials");
-        }
-
-        return _credentials.Secret;
-    }
-
 }

@@ -27,7 +27,7 @@ public class ConnectionHandler{
     public async Task Connect(){
         if (_config.Authentication != null)
         {
-            _credentialProvider.Configure(_config.Authentication);
+            _credentialProvider.Configure(_config.Authentication, ExchangeApiKeyTypeFactory.GetExchangeApiKeyType(_config));
             await _credentialProvider.Initialize();
         }
 
@@ -39,7 +39,7 @@ public class ConnectionHandler{
 
     public async Task Subscribe()
     {
-        IExchangeRequest request = RequestFactory.CreateSubscribeRequest(_config, _credentialProvider);
+        IExchangeRequest request = RequestFactory.CreateSubscribeRequest(_config, _credentialProvider.GetCredentials());
         string json = JsonConvert.SerializeObject(request);
         Console.WriteLine($"Sending {_config.Name} request message:");
         Console.WriteLine(json);

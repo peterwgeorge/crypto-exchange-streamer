@@ -1,12 +1,23 @@
 using Newtonsoft.Json;
+using Credentials.Types;
 
 namespace CryptoExchangeModels.Coinbase;
 
-public class CoinbaseApiKey
+public class CoinbaseApiKey : IKey
 {
     [JsonProperty(PropertyName = "name")]
-    public required string Name { get; set; }
+    public string Name { get; set; }
 
     [JsonProperty(PropertyName = "privateKey")]
-    public required string PrivateKey { get; set; }
+    public string PrivateKey { get; set; }
+
+    public string GetName()
+    {
+        return Name;
+    }
+
+    public string GetKey()
+    {
+        return PrivateKey;
+    }
 }
