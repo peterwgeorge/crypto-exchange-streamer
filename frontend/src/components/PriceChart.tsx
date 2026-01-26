@@ -73,7 +73,7 @@ export const PriceChart: React.FC = () => {
               <Line
                 type="monotone"
                 dataKey="btcc"
-                stroke="#08000"
+                stroke="#008000"
                 dot={true}
                 isAnimationActive={false}
                 name="BTCC"

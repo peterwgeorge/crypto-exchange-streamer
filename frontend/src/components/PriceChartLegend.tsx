@@ -63,7 +63,7 @@ export default function PriceChartLegend() {
           lineHeight: 1,
         }}
       >
-        <span style={{ color: '#08000', fontSize: '0.75rem' }}>⬤</span>
+        <span style={{ color: '#008000', fontSize: '0.75rem' }}>⬤</span>
         <img
           src={BtccLogo}
           alt="BTCC"
