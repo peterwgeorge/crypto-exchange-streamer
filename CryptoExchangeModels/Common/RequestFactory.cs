@@ -6,6 +6,7 @@ using CryptoExchangeModels.Coinbase;
 using CryptoExchangeModels.Kraken;
 using CryptoExchangeModels.Common.Types;
 using Credentials.Types;
+using System.Collections;
 
 public static class RequestFactory
 {
@@ -25,5 +26,16 @@ public static class RequestFactory
             default:
                 throw new ArgumentException($"{c.Name} not supported.");
         }
+    }
+
+    public static IExchangeRequest CreateHeartbeatRequest(ExchangeConfig c, ICredentialProvider p)
+    {
+        switch (c.Name.ToLower())
+        {
+            case "btcc":
+                return new BtccHeartbeat();
+            default:
+                throw new NotImplementedException();
+        } 
     }
 }
