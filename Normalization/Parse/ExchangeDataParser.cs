@@ -59,7 +59,7 @@ public static class ExchangeDataParser{
             CoinbaseTicker? btcTicker = res?.Events?
                 .Where(e => e.Type == "update")
                 .SelectMany(e => e.Tickers)
-                .FirstOrDefault(t => t.ProductId == "BTC-USD");
+                .FirstOrDefault(t => t.ProductId == "BTC-USDT");
             return btcTicker != null ?
                new PricePoint(btcTicker.Price, DateTimeOffset.Parse(res.Timestamp).ToUnixTimeMilliseconds(), "coinbase")
              : new();

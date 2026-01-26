@@ -9,6 +9,9 @@ public class ExchangeConfig
     public required List<string> Symbols { get; set; }
     public AuthenticationConfig? Authentication { get; set; }
 
+    public bool RequiresHeartbeat { get; set; }
+    public int HeartbeatIntervalSeconds { get; set; }
+
     public ExchangeConfig()
     {
 

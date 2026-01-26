@@ -10,21 +10,27 @@ using CryptoExchangeModels.Common.Types;
 using Normalization.Parse;
 using Normalization.Types;
 
-public class ConnectionHandler{
-    
+public class ConnectionHandler
+{
+
     public ClientWebSocket Socket;
     private readonly ExchangeConfig _config;
-    private readonly ICredentialProvider _credentialProvider;
+    private readonly ICredentialProvider? _credentialProvider;
+
+    private PeriodicTimer? _heartbeatTimer;
+    private CancellationTokenSource? _heartbeatCts;
+    private Task? _heartbeatTask;
 
     public ConnectionHandler(ClientWebSocket socket, ExchangeConfig config)
     {
         Socket = socket;
         _config = config;
-        if(_config.Authentication != null)
+        if (_config.Authentication != null)
             _credentialProvider = CredentialProviderFactory.GetProvider(_config.Authentication.Provider);
     }
-    
-    public async Task Connect(){
+
+    public async Task Connect()
+    {
         if (_config.Authentication != null)
         {
             _credentialProvider.Configure(_config.Authentication, ExchangeApiKeyTypeFactory.GetExchangeApiKeyType(_config));
@@ -35,6 +41,8 @@ public class ConnectionHandler{
         Uri uri = new Uri(feed);
         await Socket.ConnectAsync(uri, CancellationToken.None);
         Console.WriteLine($"Connected to {_config.Name} WebSocket feed {feed}.");
+
+        StartHeartbeatIfRequired();
     }
 
     public async Task Subscribe()
@@ -45,7 +53,8 @@ public class ConnectionHandler{
         Console.WriteLine(json);
 
         var bytesToSend = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
-        await Socket.SendAsync(bytesToSend, WebSocketMessageType.Text, true, CancellationToken.None);
+        var token = _heartbeatCts == null ? CancellationToken.None : _heartbeatCts!.Token;
+        await Socket.SendAsync(bytesToSend, WebSocketMessageType.Text, true, token);
     }
 
     public async Task Receive(byte[] buffer)
@@ -54,6 +63,7 @@ public class ConnectionHandler{
         if (result.MessageType == WebSocketMessageType.Close)
         {
             Console.WriteLine($"{_config.Name} WebSocket closed.");
+            StopHeartbeat();
             await Socket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
         }
         else
@@ -61,10 +71,72 @@ public class ConnectionHandler{
             string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
             Console.WriteLine($"Received from {_config.Name}: " + message);
             PricePoint p = ExchangeDataParser.GetPricePoint(message);
-            if(p.Exchange == "unknown")
+            if (p.Exchange == "unknown")
                 return;
 
             await RelayServer.BroadcastToClientsAsync(JsonConvert.SerializeObject(p));
         }
+    }
+
+    private void StartHeartbeatIfRequired()
+    {
+        if (!_config.RequiresHeartbeat || _heartbeatTimer != null)
+            return;
+
+        _heartbeatCts = new CancellationTokenSource();
+        var span = TimeSpan.FromSeconds(_config.HeartbeatIntervalSeconds);
+        _heartbeatTimer = new PeriodicTimer(span);
+
+        _heartbeatTask = RunHeartbeatAsync(_heartbeatCts.Token);
+    }
+
+    private async Task RunHeartbeatAsync(CancellationToken token)
+    {
+        try
+        {
+            while (await _heartbeatTimer!.WaitForNextTickAsync(token))
+            {
+                if (Socket.State != WebSocketState.Open)
+                    break;
+
+                await SendHeartbeatAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when stopping
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Heartbeat failure on {_config.Name}: {ex}");
+        }
+    }
+
+    private async Task SendHeartbeatAsync()
+    {
+        var heartbeat =
+            RequestFactory.CreateHeartbeatRequest(_config, _credentialProvider);
+
+        var json = JsonConvert.SerializeObject(heartbeat);
+        var bytes = Encoding.UTF8.GetBytes(json);
+
+        await Socket.SendAsync(
+            new ArraySegment<byte>(bytes),
+            WebSocketMessageType.Text,
+            true,
+            _heartbeatCts!.Token);
+
+        Console.WriteLine(
+            $"[{DateTime.UtcNow:O}] Heartbeat sent to {_config.Name}");
+    }
+    
+    private void StopHeartbeat()
+    {
+        _heartbeatCts?.Cancel();
+        _heartbeatCts?.Dispose();
+        _heartbeatCts = null;
+
+        _heartbeatTimer?.Dispose();
+        _heartbeatTimer = null;
     }
 }

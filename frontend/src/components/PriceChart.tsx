@@ -70,6 +70,14 @@ export const PriceChart: React.FC = () => {
                 isAnimationActive={false}
                 name="Kraken"
               />
+              <Line
+                type="monotone"
+                dataKey="btcc"
+                stroke="#008000"
+                dot={true}
+                isAnimationActive={false}
+                name="BTCC"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
