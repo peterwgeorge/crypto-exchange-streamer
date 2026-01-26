@@ -2,16 +2,25 @@ namespace SignatureHandling;
 
 using SignatureHandling.Interfaces;
 using Credentials.Types;
-
 public static class SignatureAlgorithmFactory
 {
-    public static ISignatureAlgorithm Create(ICredentialProvider p)
+    public static ISignatureAlgorithm Create(IKey key)
     {
-        return p.GetAlgorithmString() switch
+        ISignatureAlgorithm algorithm;
+        try
         {
-            "ecdsa" => new EcdsaSignatureAlgorithm(p.GetSecretKey(), p.GetApiKeyName()),
-            "ed25519" => new Ed25519SignatureAlgorithm(p.GetSecretKey(), p.GetApiKeyName()),
-            _ => throw new NotSupportedException($"Unsupported algorithm: {p.GetAlgorithmString()}")
-        };
-    }
+            algorithm = new EcdsaSignatureAlgorithm(key.GetKey(), key.GetName());
+            return algorithm;
+        } 
+        catch { }
+
+        try
+        {
+            algorithm = new Ed25519SignatureAlgorithm(key.GetKey(), key.GetName());
+            return algorithm;
+        }
+        catch { }
+
+        throw new InvalidOperationException("Unknown key algorithm");
+    } 
 }

@@ -21,20 +21,20 @@ public class CoinbaseRequest : IExchangeRequest
     [JsonProperty(PropertyName = "jwt")]
     public string Jwt { get; private set; }
 
-    public CoinbaseRequest(string type, ExchangeConfig c, ICredentialProvider p)
+    public CoinbaseRequest(string type, ExchangeConfig c, IKey k)
     {
         Type = type;
         Channel = c.Channel;
         ProductIds = c.Symbols.ToArray();
-        Jwt = GenerateToken(p);
+        Jwt = GenerateToken(k);
     }
 
-    static string GenerateToken(ICredentialProvider p)
+    static string GenerateToken(IKey k)
     {
-        ISignatureAlgorithm algo = SignatureAlgorithmFactory.Create(p);
+        ISignatureAlgorithm algo = SignatureAlgorithmFactory.Create(k);
         var payload = new Dictionary<string, object>
         {
-            { "sub", p.GetApiKeyName()},
+            { "sub", k.GetName()},
             { "iss", "coinbase-cloud" },
             { "nbf", Convert.ToInt64((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds) },
             { "exp", Convert.ToInt64((DateTime.UtcNow.AddMinutes(1) - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds) },
