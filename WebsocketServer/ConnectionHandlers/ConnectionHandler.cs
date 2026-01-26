@@ -27,7 +27,7 @@ public class ConnectionHandler{
     public async Task Connect(){
         if (_config.Authentication != null)
         {
-            _credentialProvider.Configure(_config.Authentication);
+            _credentialProvider.Configure(_config.Authentication, ExchangeApiKeyTypeFactory.GetExchangeApiKeyType(_config));
             await _credentialProvider.Initialize();
         }
 

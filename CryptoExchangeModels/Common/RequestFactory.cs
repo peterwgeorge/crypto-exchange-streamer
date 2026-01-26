@@ -15,7 +15,7 @@ public static class RequestFactory
         switch (c.Name.ToLower())
         {
             case "coinbase":
-                return new CoinbaseRequest(MethodTypes.Subscribe, c, p);
+                return new CoinbaseRequest(MethodTypes.Subscribe, c, p.GetCredentials());
             case "kraken":
                 return new KrakenRequest(MethodTypes.Subscribe, c.Channel, c.Symbols.ToArray());
             case "binance":

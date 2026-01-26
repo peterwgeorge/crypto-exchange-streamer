@@ -8,7 +8,7 @@ class Program
     {
         
         using var socket = new ClientWebSocket();
-        var config = new ExchangeConfig(){ Channel = "", Name = "btcc", Symbols = ["BTCUSDT"]};
+        var config = new ExchangeConfig(){ Channel = "ticker", Name = "kraken", Symbols = ["BTC/USDT"]};
         var handler = new ConnectionHandler(socket, config);
 
         try{
