@@ -143,9 +143,9 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _engine.SetWeights(new Dictionary<string, decimal>
         {
-            ["Coinbase"] = CoinbaseWeight,
-            ["Kraken"] = KrakenWeight,
-            ["Binance"] = BinanceWeight
+            ["coinbase"] = CoinbaseWeight,
+            ["kraken"] = KrakenWeight,
+            ["binance"] = BinanceWeight
         });
     }
 
@@ -153,10 +153,10 @@ public class MainViewModel : INotifyPropertyChanged
     {
         _engine.SetGlobalOffset(GlobalOffset);
 
-        _engine.SetExchangeOffset("Coinbase", CoinbaseOffset);
-        _engine.SetExchangeOffset("Kraken", KrakenOffset);
-        _engine.SetExchangeOffset("Binance", BinanceOffset);
-        _engine.SetExchangeOffset("BTCC", BtccOffset);
+        _engine.SetExchangeOffset("coinbase", CoinbaseOffset);
+        _engine.SetExchangeOffset("kraken", KrakenOffset);
+        _engine.SetExchangeOffset("binance", BinanceOffset);
+        _engine.SetExchangeOffset("btcc", BtccOffset);
     }
 
 

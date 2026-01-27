@@ -26,7 +26,7 @@ public class PriceEngine : IPriceEngine
             _latestPrices[update.Exchange] = update.Price;
 
             var avg = ComputeWeightedAverage();
-            var rows = BuildRows(avg);
+            var rows = BuildRows();
 
             SnapshotUpdated?.Invoke(new PriceSnapshot(rows, avg));
         }
@@ -67,19 +67,43 @@ public class PriceEngine : IPriceEngine
         return weightTotal == 0 ? 0 : weightedSum / weightTotal;
     }
 
-    private IReadOnlyList<PriceRow> BuildRows(decimal avg)
+    private IReadOnlyList<PriceRow> BuildRows()
     {
         var rows = new List<PriceRow>();
 
+        if (!_latestPrices.TryGetValue("btcc", out var btccPrice))
+            return rows; // nothing to compare yet
+
+        if (!_exchangeOffsets.TryGetValue("btcc", out var btccOffset))
+            return rows;
+
         foreach (var (exchange, price) in _latestPrices)
         {
-            var offset = _exchangeOffsets.TryGetValue(exchange, out var o) ? o : 0;
-            var delta = (price - avg) + _globalOffset + offset;
-            var percent = avg == 0 ? 0 : delta / avg * 100;
+            var exchangeOffset = _exchangeOffsets.TryGetValue(exchange, out var o) ? o : 0;
 
-            rows.Add(new PriceRow(exchange, price, delta, percent));
+            decimal delta;
+            decimal percent;
+
+            if (exchange == "btcc")
+            {
+                delta = 0;
+                percent = 0;
+            }
+            else
+            {
+                delta = (price + exchangeOffset) - (btccPrice + btccOffset);
+                percent = btccPrice == 0 ? 0 : delta / (btccPrice + btccOffset + _globalOffset) * 100;
+            }
+
+            rows.Add(new PriceRow(
+                exchange,
+                price + _globalOffset + exchangeOffset,
+                delta,
+                percent
+            ));
         }
 
         return rows;
     }
+
 }
