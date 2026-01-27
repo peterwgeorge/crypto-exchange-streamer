@@ -1,4 +1,6 @@
-﻿using CryptoExchangeModels.Common.Types;
+﻿using Core;
+using Core.Interfaces;
+using CryptoExchangeModels.Common.Types;
 
 public class Program
 {
@@ -10,27 +12,30 @@ public class Program
             .Build();
 
         var host = CreateHostBuilder(args, configuration).Build();
-        await host.RunAsync();
+
+        await host.StartAsync();
+
+        Console.WriteLine("DebugViewModel running. Press Ctrl+C to exit.");
+        await Task.Delay(Timeout.Infinite);
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args, IConfiguration configuration)
     {
         return Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<RelayServer>();
-                webBuilder.UseUrls(configuration["RelayServerUrl"]);
-            })
             .ConfigureServices((hostContext, services) =>
             {
-                var exchangeConfigs = configuration.GetSection("Exchanges").Get<List<ExchangeConfig>>();
+                var exchangeConfigs =
+                    configuration.GetSection("Exchanges").Get<List<ExchangeConfig>>();
+
+                services.AddSingleton<IPriceEngine, PriceEngine>();
 
                 foreach (var config in exchangeConfigs)
                 {
                     services.AddSingleton<IHostedService>(provider =>
                         new ExchangeWebSocketService(
                             provider.GetRequiredService<ILogger<ExchangeWebSocketService>>(),
-                            config
+                            config,
+                            provider.GetRequiredService<IPriceEngine>()
                         ));
                 }
             });

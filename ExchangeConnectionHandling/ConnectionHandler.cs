@@ -1,5 +1,3 @@
-namespace WebsocketServer.ConnectionHandlers;
-
 using Core.Interfaces;
 using Core.Models;
 using Credentials;
@@ -12,6 +10,7 @@ using Normalization.Types;
 using System.Net.WebSockets;
 using System.Text;
 
+namespace ExchangeConnectionHandling;
 public class ConnectionHandler
 {
 
