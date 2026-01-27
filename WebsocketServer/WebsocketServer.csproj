@@ -17,11 +17,15 @@
     <ProjectReference Include="../Credentials/Credentials.csproj" />
     <ProjectReference Include="../CryptoExchangeModels/CryptoExchangeModels.csproj" />
     <ProjectReference Include="../Normalization/Normalization.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
   <ItemGroup>
   <None Update="appsettings.json">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
   </None>
 </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
 
 </Project>

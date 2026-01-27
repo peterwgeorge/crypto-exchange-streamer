@@ -1,7 +1,10 @@
-using WebsocketServer.ConnectionHandlers;
 using CryptoExchangeModels.Common.Types;
 using System.Net.WebSockets;
 using Core.Interfaces;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace ExchangeConnectionHandling.Services;
 
 public class ExchangeWebSocketService : BackgroundService
 {
