@@ -35,7 +35,14 @@ jobs:
             /p:PublishReadyToRun=true `
             -o publish
 
+      - name: Zip publish output
+        run: |
+          Compress-Archive `
+            -Path publish\* `
+            -DestinationPath Desktop-${{ github.ref_name }}-win-x64.zip
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: publish/*.exe
+          files: |
+            Desktop-${{ github.ref_name }}-win-x64.zip
